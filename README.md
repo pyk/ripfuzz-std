@@ -35,41 +35,51 @@ the ripfuzz VM address.
 // import ripfuzz-std
 import {Harness} from "ripfuzz/Harness.sol";
 
-contract Token {
-    mapping(address => uint256) public balanceOf;
+contract Counter {
+    uint256 public count;
+    address public owner;
 
     constructor() {
-        balanceOf[msg.sender] = 1e27;
+        owner = msg.sender;
     }
 
-    function transfer(address to, uint256 amount) public {
-        balanceOf[msg.sender] -= amount;
-        balanceOf[to] += amount;
+    function increment() external {
+        require(msg.sender == owner, "not owner");
+        count += 1;
+    }
+
+    function add(uint256 x) external {
+        require(msg.sender == owner, "not owner");
+        count += x;
     }
 }
 
-contract TokenHarness is Harness {
-    Token token;
+contract CounterHarness is Harness {
+    Counter counter;
     address user;
 
     function setup() external {
-        // fund an arbitrary user and deploy under that identity
         user = address(0xBEEF);
         rvm.deal(user, 100 ether);
         rvm.label(user, "user");
 
+        // Deploy as `user` so that user owns the counter.
         rvm.prank(user);
-        token = new Token();
+        counter = new Counter();
     }
 
-    function transfer(address to, uint256 amount) external {
+    function increment() external {
         rvm.prank(user);
-        token.transfer(to, amount);
+        counter.increment();
     }
 
-    function invariant_user_balance_never_increases_alone() external view {
-        // toy invariant for illustration; real harnesses encode protocol rules
-        assert(token.balanceOf(user) <= 1e27);
+    function add(uint256 x) external {
+        rvm.prank(user);
+        counter.add(x);
+    }
+
+    function invariant_CountStaysSmall() external view {
+        assert(counter.count() < 1000);
     }
 }
 ```
@@ -77,26 +87,32 @@ contract TokenHarness is Harness {
 Run the harness with ripfuzz:
 
 ```sh
-ripfuzz run TokenHarness
+ripfuzz run CounterHarness
 ```
 
 ## Available cheatcodes
 
-| Category            | Cheatcodes                                                                                     |
-| ------------------- | ---------------------------------------------------------------------------------------------- |
-| Block               | `warp`, `roll`, `fee`, `coinbase`, `prevrandao`, `chainId`                                     |
-| Account             | `deal`, `etch`, `setNonce`, `getNonce`, `store`, `load`                                        |
-| Prank               | `prank`, `startPrank`, `stopPrank`                                                             |
-| Label               | `label`, `getLabel`                                                                            |
-| Conversion          | `toString`, `parseUint`, `parseInt`, `parseBool`, `parseAddress`, `parseBytes`, `parseBytes32` |
-| Code / wallet / ffi | `getCode`, `addr`, `sign`, `ffi`                                                               |
-| Environment         | `getEnv`                                                                                       |
+| Category    | Cheatcodes                                                                                     |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| Block       | `warp`, `roll`, `fee`, `coinbase`, `prevrandao`, `chainId`                                     |
+| Account     | `deal`, `etch`, `setNonce`, `getNonce`, `store`, `load`                                        |
+| Prank       | `prank`, `startPrank`, `stopPrank`                                                             |
+| Label       | `label`, `getLabel`                                                                            |
+| Conversion  | `toString`, `parseUint`, `parseInt`, `parseBool`, `parseAddress`, `parseBytes`, `parseBytes32` |
+| Bytecode    | `getCode`                                                                                      |
+| Wallet      | `addr`, `sign`                                                                                 |
+| FFI         | `ffi`                                                                                          |
+| Environment | `getEnv`                                                                                       |
+| Fork        | `fork`                                                                                         |
 
-The VM address is:
+The RVM address is:
 
 ```text
-0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
+0x628dC59F11F72B611132eC40437F125ba1312F08
 ```
 
-This is the same address as Foundry's HEVM
-(`address(uint160(uint256(keccak256("hevm cheat code"))))`).
+Calculated as:
+
+```text
+address(uint160(uint256(keccak256("ripfuzz cheatcode"))))
+```

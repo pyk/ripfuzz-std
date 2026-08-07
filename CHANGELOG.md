@@ -10,7 +10,29 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+- `rvm.fork` cheatcode bindings to create or select a remote chain fork:
+
+  ```solidity
+  struct ForkConfig {
+      uint32 retries;
+      uint64 backoffMs;
+      uint64 timeoutMs;
+      uint64 rateLimit;
+  }
+
+  function fork(string calldata url, uint256 blockNumber) external;
+  function fork(string calldata url, uint256 blockNumber, ForkConfig config)
+      external;
+  ```
+
 ### Changed
+
+- RVM address is now derived from `keccak256("ripfuzz cheatcode")` instead of
+  Foundry's `hevm cheat code`:
+
+  ```text
+  0x628dC59F11F72B611132eC40437F125ba1312F08
+  ```
 
 ### Fixed
 
@@ -32,13 +54,13 @@ Initial public release
   | Code / wallet / ffi | `getCode`, `addr`, `sign`, `ffi`                                                               |
   | Environment         | `getEnv`                                                                                       |
 
-- `Harness` abstract base contract with the ripfuzz VM bound at the Foundry
-  HEVM address:
+- `Harness` abstract base contract with the ripfuzz VM bound at the RVM
+  address:
 
   ```solidity
-  // 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
+  // 0x628dC59F11F72B611132eC40437F125ba1312F08
   address internal constant RVM_ADDRESS =
-      address(uint160(uint256(keccak256("hevm cheat code"))));
+      address(uint160(uint256(keccak256("ripfuzz cheatcode"))));
 
   RVM internal constant rvm = RVM(RVM_ADDRESS);
   ```
