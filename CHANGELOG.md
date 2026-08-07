@@ -10,6 +10,16 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.0.0] - 2026-08-07
+
+Initial public release
+
+### Added
+
 - `RVM` interface covering the full ripfuzz cheatcode surface:
 
   | Category            | Cheatcodes                                                                                     |
@@ -45,6 +55,11 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
   The single-argument form reverts when the key is missing. The two-argument
   form returns `defaultValue` when the key is missing.
 
-### Changed
+- `ripfuzz/` import remapping so consumers can write:
 
-### Fixed
+  ```solidity
+  import {Harness} from "ripfuzz/Harness.sol";
+  ```
+
+[unreleased]: https://github.com/pyk/ripfuzz-std/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/pyk/ripfuzz-std/releases/tag/v1.0.0
