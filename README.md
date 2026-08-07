@@ -22,20 +22,7 @@ forge install pyk/ripfuzz-std
 Alternatively, you can directly add it as a submodule:
 
 ```bash
-git submodule add https://github.com/pyk/ripfuzz-std lib/ripfuzz-std
-```
-
-Then add this remapping so imports resolve as `ripfuzz/...`:
-
-```bash
-# remappings.txt
-ripfuzz/=lib/ripfuzz-std/src/
-```
-
-Or in `foundry.toml`:
-
-```toml
-remappings = ["ripfuzz/=lib/ripfuzz-std/src/"]
+git submodule add https://github.com/pyk/ripfuzz-std
 ```
 
 ## Example usage
