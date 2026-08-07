@@ -10,6 +10,14 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.1.0] - 2026-08-07
+
+### Added
+
 - `rvm.fork` cheatcode bindings to create or select a remote chain fork:
 
   ```solidity
@@ -33,8 +41,6 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
   ```text
   0x628dC59F11F72B611132eC40437F125ba1312F08
   ```
-
-### Fixed
 
 ## [1.0.0] - 2026-08-07
 
@@ -83,5 +89,6 @@ Initial public release
   import {Harness} from "ripfuzz/Harness.sol";
   ```
 
-[unreleased]: https://github.com/pyk/ripfuzz-std/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/pyk/ripfuzz-std/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/pyk/ripfuzz-std/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/pyk/ripfuzz-std/releases/tag/v1.0.0
