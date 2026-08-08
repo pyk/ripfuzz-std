@@ -19,6 +19,8 @@ sources in this repository.
 - You must put libraries under `src/libraries/`.
 - You must keep abstract base contracts and the RVM interface at `src/` root
   (`Harness.sol`, `Logger.sol`, `Assertions.sol`, `RVM.sol`).
+- You must put example harnesses under `examples/` (Foundry
+  `test = "examples"`).
 - You must use `pragma solidity >=0.8.0 <0.9.0;`.
 - You must use `// SPDX-License-Identifier: MIT` and no per-file copyright
   headers.
