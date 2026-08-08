@@ -107,8 +107,14 @@ Rules:
 
 - You must update `CHANGELOG.md` under `[Unreleased]` for user-visible API
   changes.
-- You must update `README.md` when install steps, import paths, or example
-  usage change.
+- You must update `README.md` when install steps, import paths, or public usage
+  change.
+- You must document new user-facing helpers under the README `## Usage` section
+  as a dedicated subsection.
+- You must add a focused example harness at `examples/{Feature}Harness.sol` for
+  each Usage subsection, and wire it into the `HARNESSES` list in the Makefile.
+- Keep `examples/CounterHarness.sol` as a small end-to-end smoke harness.
+  Prefer realistic, minimal coverage over showcasing the full API surface.
 
 ### Changelog
 
