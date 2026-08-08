@@ -30,8 +30,8 @@ contract Counter {
 
 /// @title CounterHarness
 ///
-/// @dev README example harness. Kept under `examples/` and exercised by
-///      `make test` so the public example stays working as the API evolves.
+/// @dev README example harness. Kept under `examples/` and run by `make test`
+///      so the public example stays working as the API evolves.
 contract CounterHarness is Harness {
     Counter counter;
     address user;

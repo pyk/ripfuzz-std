@@ -10,6 +10,14 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [1.2.0] - 2026-08-08
+
+### Added
+
 - Harness helpers for writing ripfuzz fuzz tests:
 
   | Module       | Purpose                                                |
@@ -24,9 +32,15 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
   `bound(uint256,uint256,uint256)` so harnesses get logging, assertions, and
   input clamping without extra imports.
 
-### Changed
+- Example harness at `examples/CounterHarness.sol`, run by `make test`.
 
-### Fixed
+- Library and interface import paths:
+
+  ```solidity
+  import {Bound} from "ripfuzz/libraries/Bound.sol";
+  import {SafeERC20} from "ripfuzz/libraries/SafeERC20.sol";
+  import {IERC20} from "ripfuzz/interfaces/IERC20.sol";
+  ```
 
 ## [1.1.0] - 2026-08-07
 
@@ -103,6 +117,7 @@ Initial public release
   import {Harness} from "ripfuzz/Harness.sol";
   ```
 
-[unreleased]: https://github.com/pyk/ripfuzz-std/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/pyk/ripfuzz-std/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/pyk/ripfuzz-std/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/pyk/ripfuzz-std/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/pyk/ripfuzz-std/releases/tag/v1.0.0
