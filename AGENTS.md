@@ -17,8 +17,7 @@ sources in this repository.
 
 - You must put interfaces under `src/interfaces/`.
 - You must put libraries under `src/libraries/`.
-- You must keep abstract base contracts and the RVM interface at `src/` root
-  (`Harness.sol`, `Logger.sol`, `Assertions.sol`, `RVM.sol`).
+- You must keep abstract base contracts and the RVM interface at `src/` root.
 - You must put example harnesses under `examples/` (Foundry
   `test = "examples"`).
 - You must use `pragma solidity >=0.8.0 <0.9.0;`.
@@ -108,8 +107,8 @@ Rules:
 
 - You must update `CHANGELOG.md` under `[Unreleased]` for user-visible API
   changes.
-- You must update `README.md` when import paths, modules, or example usage
-  change.
+- You must update `README.md` when install steps, import paths, or example
+  usage change.
 
 ### Changelog
 
