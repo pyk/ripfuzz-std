@@ -25,4 +25,15 @@ abstract contract Harness is Assertions {
     function bound(uint256 x, uint256 min, uint256 max) internal pure returns (uint256) {
         return Bound.bound(x, min, max);
     }
+
+    // [*] Address ============================================================
+
+    /// @dev Create a labeled address derived from `name`.
+    /// @param name Label used to derive the private key and set on the address.
+    /// @return addr The derived address.
+    function createAddress(string memory name) internal returns (address addr) {
+        uint256 privateKey = uint256(keccak256(abi.encodePacked(name)));
+        addr = rvm.addr(privateKey);
+        rvm.label(addr, name);
+    }
 }

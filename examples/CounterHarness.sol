@@ -38,9 +38,8 @@ contract CounterHarness is Harness {
 
     /// @dev Deploy a counter owned by `user` and fund that account.
     function setup() external {
-        user = address(0xBEEF);
+        user = createAddress("user");
         rvm.deal(user, 100 ether);
-        rvm.label(user, "user");
 
         // Deploy as `user` so that user owns the counter.
         rvm.prank(user);

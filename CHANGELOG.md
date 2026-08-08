@@ -10,6 +10,9 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+- `createAddress(string)` helper: derives an address from `keccak256(name)`,
+  labels it, and returns it.
+
 ### Changed
 
 ### Fixed
