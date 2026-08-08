@@ -13,6 +13,20 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 - `createAddress(string)` helper: derives an address from `keccak256(name)`,
   labels it, and returns it.
 
+- `createAddressAndKey(string)` helper: same as `createAddress`, and also
+  returns the private key.
+
+- Actor helpers on `Harness` for multi-user harnesses:
+
+  - `useActor(actorId)` modifier pranks as a fuzz-selected actor
+  - `addActor`, `removeActor`, `getActor`, `actorCount`
+  - `addActor(string)` stores a recoverable private key
+  - `currentActor` tracks the active `useActor` selection
+
+- Example harnesses under `examples/` for each Usage feature, including:
+  - `ForkHarness` for mainnet USDC
+  - `MultiForkHarness` for Ethereum + Base USDC forks
+
 ### Changed
 
 ### Fixed

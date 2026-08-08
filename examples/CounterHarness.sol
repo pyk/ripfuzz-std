@@ -34,11 +34,11 @@ contract Counter {
 ///      so the public example stays working as the API evolves.
 contract CounterHarness is Harness {
     Counter counter;
-    address user;
 
-    /// @dev Deploy a counter owned by `user` and fund that account.
+    /// @dev Register a single actor, fund it, and deploy a counter it owns.
     function setup() external {
-        user = createAddress("user");
+        addActor("user");
+        address user = getActor(0);
         rvm.deal(user, 100 ether);
 
         // Deploy as `user` so that user owns the counter.
@@ -46,23 +46,23 @@ contract CounterHarness is Harness {
         counter = new Counter();
     }
 
-    /// @dev Call `counter.increment` as `user`.
-    function increment() external {
-        rvm.prank(user);
+    /// @dev Call `counter.increment` as a fuzz-selected actor.
+    /// @param actorId Fuzzed actor index, wrapped over the actor pool.
+    function increment(uint256 actorId) external useActor(actorId) {
         counter.increment();
     }
 
-    /// @dev Call `counter.add` as `user` with a bounded input.
+    /// @dev Call `counter.add` as a fuzz-selected actor with a bounded input.
+    /// @param actorId Fuzzed actor index, wrapped over the actor pool.
     /// @param x Unbounded fuzz input, clamped to `[1, 100]`.
-    function add(uint256 x) external {
+    function add(uint256 actorId, uint256 x) external useActor(actorId) {
         x = bound(x, 1, 100);
-        rvm.prank(user);
         counter.add(x);
     }
 
-    /// @dev Invariant: `owner` remains the funded `user` from `setup`.
+    /// @dev Invariant: `owner` remains the funded actor from `setup`.
     function invariant_OwnerIsUser() external {
-        eq(counter.owner(), user, "owner is user");
+        eq(counter.owner(), getActor(0), "owner is user");
     }
 
     /// @dev Invariant: `count` stays below a generous upper bound for default
