@@ -1,5 +1,8 @@
 [profile.default]
 src = "src"
 out = "out"
+test = "examples"
 libs = ["node_modules", "lib"]
 remappings = ["ripfuzz/=src/"]
+ast = true
+extra_output = ["storageLayout"]

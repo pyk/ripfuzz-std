@@ -10,6 +10,20 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+- Harness helpers for writing ripfuzz fuzz tests:
+
+  | Module       | Purpose                                                |
+  | ------------ | ------------------------------------------------------ |
+  | `Logger`     | `log(...)` helpers via overloaded `Log` events         |
+  | `Assertions` | `ensure`, `eq`, `neq`, `unreachable` with failure logs |
+  | `Bound`      | Clamp a `uint256` into an inclusive `[min, max]` range |
+  | `SafeERC20`  | Safe `approve` / `transfer` for non-standard ERC20s    |
+  | `IERC20`     | Minimal ERC20 + metadata + EIP-2612 permit interface   |
+
+- `Harness` now inherits `Assertions` (and therefore `Logger`) and exposes
+  `bound(uint256,uint256,uint256)` so harnesses get logging, assertions, and
+  input clamping without extra imports.
+
 ### Changed
 
 ### Fixed

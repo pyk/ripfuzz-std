@@ -1,9 +1,6 @@
 # Ripfuzz Standard Library
 
-Ripfuzz standard library cheatcodes and harness helpers for writing
-coverage-guided fuzz harnesses. These interfaces are intended for
-[ripfuzz][ripfuzz]. They cover the Foundry-style cheatcode subset that ripfuzz
-currently implements.
+Standard library for writing [ripfuzz][ripfuzz] harnesses.
 
 Please refer to [the list of currently available cheatcodes][list]. More
 cheatcodes will be added as ripfuzz grows support.
@@ -29,7 +26,7 @@ git submodule add https://github.com/pyk/ripfuzz-std
 
 Below is a minimal harness that uses ripfuzz cheatcodes to set up state and
 check an invariant. Inherit from `Harness` to get an `rvm` instance pointed at
-the ripfuzz VM address.
+the ripfuzz VM address, plus `log`, assertions, and `bound`.
 
 ```solidity
 // import ripfuzz-std
@@ -74,12 +71,17 @@ contract CounterHarness is Harness {
     }
 
     function add(uint256 x) external {
+        x = bound(x, 1, 100);
         rvm.prank(user);
         counter.add(x);
     }
 
-    function invariant_CountStaysSmall() external view {
-        assert(counter.count() < 1000);
+    function invariant_OwnerIsUser() external {
+        eq(counter.owner(), user, "owner is user");
+    }
+
+    function invariant_CountStaysBounded() external {
+        ensure(counter.count() < 1_000_000, "count stayed below 1_000_000");
     }
 }
 ```
@@ -88,6 +90,34 @@ Run the harness with ripfuzz:
 
 ```sh
 ripfuzz run CounterHarness
+```
+
+## Modules
+
+| Module       | Import                            | Purpose                                            |
+| ------------ | --------------------------------- | -------------------------------------------------- |
+| `Harness`    | `ripfuzz/Harness.sol`             | Base contract: `rvm`, logging, assertions, `bound` |
+| `RVM`        | `ripfuzz/RVM.sol`                 | Cheatcode interface                                |
+| `Logger`     | `ripfuzz/Logger.sol`              | `log(...)` helpers via `Log` events                |
+| `Assertions` | `ripfuzz/Assertions.sol`          | `ensure`, `eq`, `neq`, `unreachable`               |
+| `Bound`      | `ripfuzz/libraries/Bound.sol`     | Clamp fuzz inputs into a range                     |
+| `SafeERC20`  | `ripfuzz/libraries/SafeERC20.sol` | Safe approve / transfer for non-standard tokens    |
+| `IERC20`     | `ripfuzz/interfaces/IERC20.sol`   | Minimal ERC20 + metadata + permit interface        |
+
+`Harness` inherits `Assertions` (and therefore `Logger`) and exposes `bound`,
+so most harnesses only need:
+
+```solidity
+import {Harness} from "ripfuzz/Harness.sol";
+```
+
+For token helpers:
+
+```solidity
+import {IERC20} from "ripfuzz/interfaces/IERC20.sol";
+import {SafeERC20} from "ripfuzz/libraries/SafeERC20.sol";
+
+using SafeERC20 for IERC20;
 ```
 
 ## Available cheatcodes
