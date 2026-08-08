@@ -99,8 +99,6 @@ Rules:
 
 ## Inheritance and API shape
 
-- `Harness` must inherit `Assertions` (and therefore `Logger`).
-- `Harness` must expose `rvm` and `bound`.
 - Libraries such as `Bound` and `SafeERC20` must remain usable without
   inheriting `Harness`.
 - Prefer adding shared harness helpers to `Harness` only when most harnesses
