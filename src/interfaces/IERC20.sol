@@ -31,6 +31,20 @@ interface IERC20 {
     /// @return The total supply.
     function totalSupply() external view returns (uint256);
 
+    /// @dev Transfer `amount` tokens from the caller to `to`.
+    /// @param to The recipient address.
+    /// @param amount The transfer amount.
+    /// @return True if the operation succeeded.
+    function transfer(address to, uint256 amount) external returns (bool);
+
+    /// @dev Transfer `amount` tokens from `from` to `to` using the caller's
+    ///      allowance.
+    /// @param from The token owner.
+    /// @param to The recipient address.
+    /// @param amount The transfer amount.
+    /// @return True if the operation succeeded.
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+
     // [*] Metadata ===========================================================
 
     /// @dev Return the number of decimals used to represent token amounts.

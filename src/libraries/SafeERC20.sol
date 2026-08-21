@@ -37,7 +37,7 @@ library SafeERC20 {
     /// @param amount The transfer amount.
     function safeTransfer(IERC20 token, address to, uint256 amount) internal {
         (bool success, bytes memory data) =
-            address(token).call(abi.encodeWithSelector(bytes4(keccak256("transfer(address,uint256)")), to, amount));
+            address(token).call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "SafeERC20: transfer failed");
     }
 }
