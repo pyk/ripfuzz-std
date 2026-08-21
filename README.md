@@ -204,16 +204,22 @@ unreachable("should never reach this path");
 
 Example: [`examples/TokensHarness.sol`](examples/TokensHarness.sol)
 
-Optional ERC20 helpers for non-standard tokens:
+Optional ERC20 helpers for non-standard tokens, plus `IWETH` to wrap and unwrap
+ETH:
 
 ```solidity
 import {IERC20} from "ripfuzz/interfaces/IERC20.sol";
+import {IWETH} from "ripfuzz/interfaces/IWETH.sol";
 import {SafeERC20} from "ripfuzz/libraries/SafeERC20.sol";
 
 using SafeERC20 for IERC20;
 
 token.safeApprove(spender, amount);
 token.safeTransfer(to, amount);
+
+IWETH weth = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+weth.deposit{value: amount}();
+weth.withdraw(amount);
 ```
 
 ### Fork

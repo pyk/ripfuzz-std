@@ -10,6 +10,8 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+- `IWETH` interface with `deposit` and `withdraw`.
+
 - `IERC20.transfer` and `IERC20.transferFrom`.
 
 - `createAddress(string)` helper: derives an address from `keccak256(name)`,
