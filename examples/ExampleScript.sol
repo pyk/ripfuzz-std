@@ -5,7 +5,7 @@ import {Script} from "ripfuzz/std.sol";
 
 /// @title ExampleScript
 ///
-/// @dev Example of a `ripfuzz exec` script with labeled accounts and logs.
+/// @dev Example of a `ripfuzz exec` script with a labeled account and logs.
 ///
 ///      Run with:
 ///
@@ -14,10 +14,10 @@ import {Script} from "ripfuzz/std.sol";
 ///      The run prints the script logs to the terminal and saves the
 ///      execution trace under `.ripfuzz/traces`:
 ///
-///      alice: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+///      alice: 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf
 ///      done
 contract ExampleScript is Script {
-    /// @dev Deploy a counter owned by a labeled account, then increment it.
+    /// @dev Fund a labeled account, then log its address.
     function exec() external {
         address alice = rvm.addr(1);
         rvm.label(alice, "alice");

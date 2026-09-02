@@ -218,8 +218,10 @@ bound is tight. The best sequence is saved under `.ripfuzz/traces` for replay.
 
 ## Scripts
 
-Scripts run deterministic flows once with `ripfuzz exec`. A script inherits
-`Script`, optionally defines `setup()`, and must define `exec()`:
+Scripts run a deterministic flow once with `ripfuzz exec`: replay a position
+against a fork, verify a strategy, or reproduce a sequence found by `test` or
+`max`. A script inherits `Script`, optionally defines `setup()`, and must
+define `exec()`:
 
 Example: [`examples/ExampleScript.sol`](examples/ExampleScript.sol), run by
 `make exec`.
@@ -245,8 +247,17 @@ Run with:
 ripfuzz exec examples/ExampleScript.sol
 ```
 
-`log` output prints to the terminal and the execution trace is saved under ##
-Cheatcodes
+The `log` output prints to the terminal and the execution trace is saved under
+`.ripfuzz/traces`:
+
+```text
+script examples/ExampleScript.sol:ExampleScript deployed at 0xD1c9...cd22
+  alice: 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf
+  done
+execution trace for examples/ExampleScript.sol:ExampleScript saved
+```
+
+## Cheatcodes
 
 Harnesses, invariant tests, and scripts access ripfuzz cheatcodes through
 `rvm`. Full list: [`src/RVM.sol`](src/RVM.sol).
