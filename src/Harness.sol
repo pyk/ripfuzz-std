@@ -2,18 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {Assertions} from "./Assertions.sol";
+import {Base} from "./Base.sol";
 import {Bound} from "./libraries/Bound.sol";
 import {RVM} from "./RVM.sol";
 
 /// @title Ripfuzz Harness
 ///
 /// @dev Base contract for ripfuzz harnesses.
-abstract contract Harness is Assertions {
+abstract contract Harness is Assertions, Base {
     // [*] RVM ================================================================
-
-    address internal constant RVM_ADDRESS = address(uint160(uint256(keccak256("ripfuzz cheatcode"))));
-
-    RVM internal constant rvm = RVM(RVM_ADDRESS);
 
     // [*] Actors =============================================================
 
