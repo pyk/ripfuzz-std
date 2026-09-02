@@ -10,6 +10,10 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
+- `Invariant` struct with `id` and `description` fields.
+
+- `RVM.bail(Invariant)` cheatcode to report a broken invariant by id.
+
 ### Changed
 
 ### Fixed
