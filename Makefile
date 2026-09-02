@@ -1,17 +1,4 @@
-.PHONY: fmt lint test exec
-
-HARNESSES := \
-	CounterHarness \
-	CheatcodesHarness \
-	GetEnvHarness \
-	AddressHarness \
-	ActorsHarness \
-	BoundHarness \
-	LoggingHarness \
-	AssertionsHarness \
-	TokensHarness \
-	ForkHarness \
-	MultiForkHarness
+.PHONY: fmt test exec
 
 TESTS := \
 	ExampleInvariantTest
@@ -19,17 +6,9 @@ TESTS := \
 SCRIPTS := \
 	ExampleScript
 
-fmt: # Run formatters
-	@echo "Run foundry formatter"
-	@forge fmt
+fmt: # Run markdown formatter
 	@echo "Run markdown formatter"
 	@uvx --from panache-cli==2.61.0 panache format .
-
-lint: # Check format and compile Solidity sources
-	@echo "Check foundry formatter"
-	@forge fmt --check src/ examples/
-	@echo "Compile Solidity sources"
-	@forge compile --skip script
 
 test: # Run example smoke tests with ripfuzz
 	@echo "Clean ripfuzz corpus"

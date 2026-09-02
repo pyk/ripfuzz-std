@@ -10,17 +10,24 @@ cheatcodes will be added as ripfuzz grows support.
 
 ## Installation
 
-To install using Foundry:
+Clone the repository into your project and add a remapping:
 
 ```bash
-forge install pyk/ripfuzz-std
+git clone https://github.com/pyk/ripfuzz-std lib/ripfuzz-std
 ```
 
-Alternatively, you can directly add it as a submodule:
-
-```bash
-git submodule add https://github.com/pyk/ripfuzz-std
+```text
+# remappings.txt
+ripfuzz/=lib/ripfuzz-std/src/
 ```
+
+> [!NOTE]
+>
+> A `ripfuzz fetch` command to install pinned releases is planned:
+>
+> ```bash
+> ripfuzz fetch https://github.com/pyk/ripfuzz-std/archive/v2.0.0.tar.gz
+> ```
 
 ## Example
 
@@ -83,7 +90,7 @@ contract CounterHarness is Harness {
 Run with:
 
 ```sh
-ripfuzz run CounterHarness
+ripfuzz test examples/CounterHarness.sol
 ```
 
 ## Usage

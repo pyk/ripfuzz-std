@@ -14,7 +14,7 @@ have a severe negative impact on the project and the user.
 | :----- | :-------------------------------------------------------------- |
 | GEN-01 | MUST keep the public import remapping as `ripfuzz/=src/`        |
 | GEN-02 | MUST run `make fmt` before finishing if sources need formatting |
-| GEN-03 | MUST run `make lint` after Solidity changes                     |
+| GEN-03 | MUST run `make test` and `make exec` after Solidity changes     |
 | GEN-04 | MUST run `make test` after harness or example changes           |
 | GEN-05 | MUST NOT use em dash characters in code, comments, or markdown  |
 
@@ -25,7 +25,7 @@ have a severe negative impact on the project and the user.
 | LAYOUT-01 | MUST put interfaces under `src/interfaces/`                                            |
 | LAYOUT-02 | MUST put libraries under `src/libraries/`                                              |
 | LAYOUT-03 | MUST keep abstract base contracts and the RVM interface at `src/` root                 |
-| LAYOUT-04 | MUST put example harnesses under `examples/` (Foundry `test = "examples"`)             |
+| LAYOUT-04 | MUST put example harnesses under `examples/`                                           |
 | LAYOUT-05 | MUST use `pragma solidity >=0.8.0 <0.9.0;`                                             |
 | LAYOUT-06 | MUST use `// SPDX-License-Identifier: MIT` and MUST NOT add per-file copyright headers |
 
@@ -151,19 +151,18 @@ After cutting a release section, the empty `[Unreleased]` block MUST look like:
 
 ### make
 
-1. Format sources: `make fmt`
-2. Check format and compile: `make lint`
-3. Run example harness smoke tests: `make test`
+1. Format markdown: `make fmt`
+2. Run example smoke tests: `make test` and `make exec`
 
 For example:
 
 ```sh
-# Format Solidity and markdown
+# Format markdown
 make fmt
 
-# Check foundry formatter and compile sources
-make lint
-
-# Run example harness smoke tests with ripfuzz
+# Run example smoke tests with ripfuzz
 make test
+
+# Run example script smoke tests with ripfuzz exec
+make exec
 ```
