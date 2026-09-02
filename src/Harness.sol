@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import {Assertions} from "./Assertions.sol";
 import {Base} from "./Base.sol";
 import {Bound} from "./libraries/Bound.sol";
 import {RVM} from "./RVM.sol";
@@ -9,7 +8,7 @@ import {RVM} from "./RVM.sol";
 /// @title Ripfuzz Harness
 ///
 /// @dev Base contract for ripfuzz harnesses.
-abstract contract Harness is Assertions, Base {
+abstract contract Harness is Base {
     // [*] RVM ================================================================
 
     // [*] Actors =============================================================

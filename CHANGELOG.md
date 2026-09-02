@@ -25,6 +25,9 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Changed
 
+- Removed `Assertions` and its string-message checks (`ensure`, `eq`, `neq`,
+  `unreachable`). Use the bail-backed checks on `InvariantTest` instead.
+
 ### Fixed
 
 ## [1.3.0] - 2026-08-21

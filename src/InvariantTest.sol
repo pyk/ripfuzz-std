@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {Harness} from "./Harness.sol";
+import {Logger} from "./Logger.sol";
 import {RVM} from "./RVM.sol";
 
 /// @title InvariantTest
@@ -9,7 +10,7 @@ import {RVM} from "./RVM.sol";
 /// @dev Base contract for ripfuzz invariant tests. Provides invariant handles
 ///      created via `createInvariant` and checks that report a broken
 ///      invariant through `rvm.bail` instead of an assert panic.
-abstract contract InvariantTest is Harness {
+abstract contract InvariantTest is Harness, Logger {
     // [*] Invariant ===========================================================
 
     /// @dev Identifies a broken invariant reported via `bail`.
