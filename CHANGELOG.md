@@ -10,9 +10,14 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
-- `Invariant` struct with `id` and `description` fields.
+- `RVM.Invariant` struct with `id` and `description` fields.
 
-- `RVM.bail(Invariant)` cheatcode to report a broken invariant by id.
+- `RVM.bail(RVM.Invariant)` cheatcode to report a broken invariant by id.
+
+- `InvariantTest` base contract with `createInvariant` handles and bail-backed
+  checks (`ensure`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`).
+
+- `std.sol` entrypoint re-exporting the standard library.
 
 ### Changed
 
