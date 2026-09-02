@@ -23,6 +23,11 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 - `std.sol` entrypoint re-exporting the standard library.
 
+- End-to-end invariant testing example at `examples/ExampleInvariantTest.sol`
+  with a target contract, setup, handlers, and invariant handles.
+
+- End-to-end script example at `examples/ExampleScript.sol`.
+
 ### Changed
 
 - Removed `Assertions` and its string-message checks (`ensure`, `eq`, `neq`,

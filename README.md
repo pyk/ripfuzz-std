@@ -2,11 +2,7 @@
 
 Standard library for writing [ripfuzz][ripfuzz] harnesses.
 
-Please refer to [the list of currently available cheatcodes][list]. More
-cheatcodes will be added as ripfuzz grows support.
-
 [ripfuzz]: <https://github.com/pyk/ripfuzz>
-[list]: <src/RVM.sol>
 
 ## Installation
 
@@ -29,60 +25,160 @@ ripfuzz/=lib/ripfuzz-std/src/
 > ripfuzz fetch https://github.com/pyk/ripfuzz-std/archive/v2.0.0.tar.gz
 > ```
 
-## Example
+## Usage
 
-End-to-end smoke harness:
-[`examples/CounterHarness.sol`](examples/CounterHarness.sol).
+ripfuzz has three use cases:
+
+| Command        | Use case               |
+| :------------- | :--------------------- |
+| `ripfuzz test` | Find broken invariants |
+| `ripfuzz max`  | Find the maximum value |
+| `ripfuzz exec` | Execute a script once  |
+
+## Invariant testing
+
+Invariant testing checks that properties of your protocol hold after every
+sequence of state-changing calls. Ripfuzz deploys your test contract, runs
+`setup()` once, generates sequences of handler calls, and runs every
+`invariant_*` function after each call. A broken invariant is reported with the
+shortest sequence that reproduces it.
+
+End-to-end example:
+[`examples/ExampleInvariantTest.sol`](examples/ExampleInvariantTest.sol), run
+by `make test`.
+
+### 1. Write the invariant test
+
+A invariant test contract inherits `InvariantTest` and has three kinds of
+functions:
+
+- **Setup**: `setup()` runs once before fuzzing. Deploy the target protocol and
+  prepare state.
+- **Handlers**: external or public functions the fuzzer calls with random
+  inputs to mutate state.
+- **Invariant functions**: functions prefixed with `invariant_` that take no
+  arguments. Ripfuzz runs them after every handler call.
+
+Declare each invariant as a handle with `createInvariant`, then assert with the
+check family: `ensure`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`. A failed check
+reports the invariant by id through `rvm.bail`.
 
 ```solidity
-import {Harness} from "ripfuzz/Harness.sol";
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.0 <0.9.0;
+
+import {InvariantTest} from "ripfuzz/std.sol";
 
 contract Counter {
+    // [*] State ==============================================================
+
     uint256 public count;
     address public owner;
+
+    // [*] Constructor ========================================================
 
     constructor() {
         owner = msg.sender;
     }
 
-    function increment() external {
-        require(msg.sender == owner, "not owner");
-        count += 1;
-    }
+    // [*] Handlers ===========================================================
 
     function add(uint256 x) external {
-        require(msg.sender == owner, "not owner");
         count += x;
     }
 }
 
-contract CounterHarness is Harness {
-    Counter counter;
+contract ExampleInvariantTest is InvariantTest {
+    // [*] Invariants =========================================================
+
+    Invariant internal invOwner = createInvariant("INV-01", "owner never changes");
+    Invariant internal invSmall = createInvariant("INV-02", "count must stay small");
+
+    // [*] State ==============================================================
+
+    Counter internal counter;
+
+    // [*] Setup ==============================================================
 
     function setup() external {
         addActor("user");
-        address user = getActor(0);
-        rvm.deal(user, 100 ether);
-
-        rvm.prank(user);
+        rvm.prank(getActor(0));
         counter = new Counter();
     }
 
-    function increment(uint256 actorId) external useActor(actorId) {
-        counter.increment();
-    }
+    // [*] Handlers ===========================================================
 
     function add(uint256 actorId, uint256 x) external useActor(actorId) {
-        x = bound(x, 1, 100);
+        x = bound(x, 1, 10);
         counter.add(x);
     }
 
-    function invariant_OwnerIsUser() external {
-        eq(counter.owner(), getActor(0), "owner is user");
+    // [*] Invariant functions ================================================
+
+    function invariant_OwnerNeverChanges() external {
+        eq(counter.owner(), getActor(0), invOwner);
     }
 
-    function invariant_CountStaysBounded() external {
-        ensure(counter.count() < 1_000_000, "count stayed below 1_000_000");
+    function invariant_CountStaysSmall() external {
+        lt(counter.count(), 100, invSmall);
+    }
+}
+```
+
+### 2. Run the invariant test
+
+```sh
+ripfuzz test examples/ExampleInvariantTest.sol
+```
+
+Ripfuzz compiles the harness, deploys it, runs `setup()`, then fuzzes. The
+example reports one broken invariant: fourteen `add` calls push `count` to
+`100`:
+
+```text
+fuzzing started: 2 threads, 2000 runs, max 20 calls, 2 invariants, 120s timeout
+found broken invariant INV-02
+fuzzing finished: 1 broken invariant, 2000 runs, 0s
+shrinking started: 1 broken invariant, 2 threads, 10000 runs
+broken invariant INV-02 minimized from 14 calls to 14
+shrinking finished: 1 broken invariant, 2s
+```
+
+### 3. Review the broken invariants
+
+Each broken invariant is saved under `.ripfuzz/traces` with the full call
+sequence and the failing check values:
+
+```text
+Logs:
+  INV-02: count must stay small
+    a: 100
+    b: 100
+```
+
+Broken invariants are deduplicated by invariant id, so each id is reported once
+with its shortest reproduction. Invariant functions that use handle-based
+checks cannot be `view` because the checks call the ripfuzz VM.
+
+## Scripts
+
+Scripts run deterministic flows once with `ripfuzz exec`. A script inherits
+`Script`, optionally defines `setup()`, and must define `exec()`:
+
+Example: [`examples/ExampleScript.sol`](examples/ExampleScript.sol), run by
+`make exec`.
+
+```solidity
+import {Script} from "ripfuzz/std.sol";
+
+contract ExampleScript is Script {
+    function exec() external {
+        address alice = rvm.addr(1);
+        rvm.label(alice, "alice");
+        rvm.deal(alice, 100 ether);
+
+        log("alice: ", alice);
+        log("done");
     }
 }
 ```
@@ -90,206 +186,43 @@ contract CounterHarness is Harness {
 Run with:
 
 ```sh
-ripfuzz test examples/CounterHarness.sol
+ripfuzz exec examples/ExampleScript.sol
 ```
 
-## Usage
+`log` output prints to the terminal and the execution trace is saved under
+`.ripfuzz/traces`.
 
-Inherit `Harness` to get cheatcodes, helpers, and assertions:
+## Max
+
+Max mode finds the largest reachable value of a harness `value()` function.
+Inherit `Harness`, define `value()`, and run `ripfuzz max`:
 
 ```solidity
-import {Harness} from "ripfuzz/Harness.sol";
+import {Harness} from "ripfuzz/std.sol";
 
-contract MyHarness is Harness {
-    // ...
+contract ExampleMax is Harness {
+    function value() external view returns (uint256) {
+        // ...
+    }
 }
 ```
 
-Each feature has a runnable example under `examples/`.
+Run with:
 
-### Cheatcodes
+```sh
+ripfuzz max examples/ExampleMax.sol
+```
 
-Example: [`examples/CheatcodesHarness.sol`](examples/CheatcodesHarness.sol)
+## Cheatcodes
 
-Access ripfuzz cheatcodes through `rvm`. Full list:
-[`src/RVM.sol`](src/RVM.sol).
+Harnesses, invariant tests, and scripts access ripfuzz cheatcodes through
+`rvm`. Full list: [`src/RVM.sol`](src/RVM.sol).
 
 ```solidity
 rvm.deal(user, 100 ether);
 rvm.prank(user);
 rvm.warp(block.timestamp + 1 days);
-```
-
-### Environment variables
-
-Example: [`examples/GetEnvHarness.sol`](examples/GetEnvHarness.sol)
-
-Read process environment variables, including values from a project `.env`
-file:
-
-```solidity
-// Required: reverts when the key is missing.
-string memory rpcUrl = rvm.getEnv("ETH_RPC_URL");
-
-// Optional: returns defaultValue when the key is missing.
-string memory network = rvm.getEnv("NETWORK", "local");
-```
-
-### Addresses
-
-Example: [`examples/AddressHarness.sol`](examples/AddressHarness.sol)
-
-Create labeled addresses derived from a name:
-
-```solidity
-address user = createAddress("user");
-(address signer, uint256 privateKey) = createAddressAndKey("signer");
-```
-
-### Actors
-
-Example: [`examples/ActorsHarness.sol`](examples/ActorsHarness.sol)
-
-Manage a pool of fuzz actors and prank as one per handler call:
-
-```solidity
-function setup() external {
-    addActor("Alice");
-    addActor("Bob");
-}
-
-function act(uint256 actorId, uint256 x) external useActor(actorId) {
-    // msg.sender == currentActor for this call
-    target.doThing(x);
-}
-```
-
-| Helper                      | Purpose                                        |
-| :-------------------------- | :--------------------------------------------- |
-| `getActor(actorId)`         | Actor at index, wrapped with modulo            |
-| `actorCount()`              | Pool size                                      |
-| `getActorPrivateKey(actor)` | Key for actors created with `addActor(string)` |
-| `removeActor(actor)`        | Remove from the pool                           |
-| `currentActor`              | Actor selected by the active `useActor`        |
-
-### Bound
-
-Example: [`examples/BoundHarness.sol`](examples/BoundHarness.sol)
-
-Clamp fuzz inputs into an inclusive range:
-
-```solidity
-x = bound(x, 1, 100);
-```
-
-### Logging
-
-Example: [`examples/LoggingHarness.sol`](examples/LoggingHarness.sol)
-
-Emit structured logs from handlers and assertions:
-
-```solidity
-log("deposit");
-log("amount", amount);
-log("user", user);
-```
-
-### Assertions
-
-Example: [`examples/AssertionsHarness.sol`](examples/AssertionsHarness.sol)
-
-Fail the campaign with a logged message:
-
-```solidity
-ensure(ok, "operation succeeded");
-eq(a, b, "balances match");
-neq(a, b, "ids differ");
-unreachable("should never reach this path");
-```
-
-### Tokens
-
-Example: [`examples/TokensHarness.sol`](examples/TokensHarness.sol)
-
-Optional ERC20 helpers for non-standard tokens, plus `IWETH` to wrap and unwrap
-ETH:
-
-```solidity
-import {IERC20} from "ripfuzz/interfaces/IERC20.sol";
-import {IWETH} from "ripfuzz/interfaces/IWETH.sol";
-import {SafeERC20} from "ripfuzz/libraries/SafeERC20.sol";
-
-using SafeERC20 for IERC20;
-
-token.safeApprove(spender, amount);
-token.safeTransfer(to, amount);
-
-IWETH weth = IWETH(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-weth.deposit{value: amount}();
-weth.withdraw(amount);
-```
-
-### Fork
-
-Example: [`examples/ForkHarness.sol`](examples/ForkHarness.sol)
-
-Load the RPC URL from the environment (including a project `.env` file), then
-fork and interact with a live contract such as USDC:
-
-```solidity
-// .env
-// ETH_RPC_URL=https://eth.meowrpc.com
-
-string memory rpcUrl = rvm.getEnv("ETH_RPC_URL", "https://eth.meowrpc.com");
-rvm.fork(rpcUrl, 25_708_159);
-
-IERC20 usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-rvm.label(address(usdc), "USDC");
-
-// Fund an actor by writing the FiatToken balances mapping (slot 9).
-bytes32 slot = keccak256(abi.encode(alice, uint256(9)));
-rvm.store(address(usdc), slot, bytes32(uint256(1_000_000e6)));
-
-usdc.safeTransfer(bob, amount);
-```
-
-### Multi-fork
-
-Example: [`examples/MultiForkHarness.sol`](examples/MultiForkHarness.sol)
-
-Load per-chain RPC URLs once in `setup`, then use modifiers to select forks:
-
-```solidity
-// .env
-// ETH_RPC_URL=https://eth.meowrpc.com
-// BASE_RPC_URL=https://base.meowrpc.com
-
-string internal ethRpcUrl;
-string internal baseRpcUrl;
-
-function setup() external {
-    ethRpcUrl = rvm.getEnv("ETH_RPC_URL", "https://eth.meowrpc.com");
-    baseRpcUrl = rvm.getEnv("BASE_RPC_URL", "https://base.meowrpc.com");
-    // ...
-}
-
-modifier onEthereum() {
-    rvm.fork(ethRpcUrl, 25_708_159);
-    _;
-}
-
-modifier onBase() {
-    rvm.fork(baseRpcUrl, 49_688_843);
-    _;
-}
-
-function transferEthUsdc(uint256 actorId, uint256 amount)
-    external
-    onEthereum
-    useActor(actorId)
-{
-    ethUsdc.safeTransfer(getActor(actorId + 1), amount);
-}
+rvm.fork(rpcUrl, blockNumber);
 ```
 
 ## License
