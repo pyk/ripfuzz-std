@@ -260,14 +260,37 @@ execution trace for examples/ExampleScript.sol:ExampleScript saved
 ## Cheatcodes
 
 Harnesses, invariant tests, and scripts access ripfuzz cheatcodes through
-`rvm`. Full list: [`src/RVM.sol`](src/RVM.sol).
+`rvm`. Full interface: [`src/RVM.sol`](src/RVM.sol).
+
+| #   | Group         | Cheatcodes                                                 |
+| :-- | :------------ | :--------------------------------------------------------- |
+| 1   | Block         | `warp`, `roll`, `fee`, `coinbase`, `prevrandao`, `chainId` |
+| 2   | Account       | `deal`, `etch`, `setNonce`, `getNonce`, `store`, `load`    |
+| 3   | Prank         | `prank`, `startPrank`, `stopPrank`                         |
+| 4   | Label         | `label`, `getLabel`                                        |
+| 5   | Conversion    | `toString`, `parse*`                                       |
+| 6   | Code / wallet | `getCode`, `addr`, `sign`, `ffi`                           |
+| 7   | Environment   | `getEnv`                                                   |
+| 8   | Fork          | `fork`                                                     |
+| 9   | Invariant     | `bail`                                                     |
 
 ```solidity
 rvm.deal(user, 100 ether);
 rvm.prank(user);
 rvm.warp(block.timestamp + 1 days);
-rvm.fork(rpcUrl, blockNumber);
+rvm.fork(rpcUrl, 25_708_159);
 ```
+
+Notes:
+
+- `prank` applies to one call. `startPrank` persists across calls until
+  `stopPrank`.
+- `getEnv` reverts when the key is missing. The two-argument form returns the
+  default instead. Values from a project `.env` file are supported.
+- `fork` switches chain state for all subsequent calls. Per-chain RPC URLs come
+  from the environment or a project `.env` file.
+- `bail(Invariant)` reports a broken invariant and reverts the call. Prefer the
+  check helpers on `InvariantTest` over calling it directly.
 
 ## License
 
