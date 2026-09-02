@@ -1,4 +1,4 @@
-.PHONY: fmt lint test
+.PHONY: fmt lint test exec
 
 HARNESSES := \
 	CounterHarness \
@@ -9,10 +9,15 @@ HARNESSES := \
 	BoundHarness \
 	LoggingHarness \
 	AssertionsHarness \
-	ExampleInvariantTest \
 	TokensHarness \
 	ForkHarness \
 	MultiForkHarness
+
+TESTS := \
+	ExampleInvariantTest
+
+SCRIPTS := \
+	ExampleScript
 
 fmt: # Run formatters
 	@echo "Run foundry formatter"
@@ -26,20 +31,26 @@ lint: # Check format and compile Solidity sources
 	@echo "Compile Solidity sources"
 	@forge compile --skip script
 
-test: # Run example harness smoke tests with ripfuzz
-	@echo "Clean foundry build artifacts"
-	@forge clean
-	@echo "Build foundry project"
-	@forge build
+test: # Run example smoke tests with ripfuzz
 	@echo "Clean ripfuzz corpus"
 	@rm -rf .ripfuzz/corpus
-	@for harness in $(HARNESSES); do \
-		echo "Run $$harness smoke test"; \
-		ripfuzz test examples/$$harness.sol \
+	@for test in $(TESTS); do \
+		echo "Run $$test smoke test"; \
+		ripfuzz test examples/$$test.sol \
 			--max-fuzz-runs 100 \
 			--threads 2 \
 			--timeout 60 \
 			--max-calls 20 \
+			--log-level warn \
+			|| exit 1; \
+	done
+
+exec: # Run example script smoke tests with ripfuzz
+	@echo "Clean ripfuzz corpus"
+	@rm -rf .ripfuzz/corpus
+	@for script in $(SCRIPTS); do \
+		echo "Run $$script smoke test"; \
+		ripfuzz exec examples/$$script.sol \
 			--log-level warn \
 			|| exit 1; \
 	done

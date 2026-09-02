@@ -10,12 +10,16 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 ### Added
 
-- `RVM.Invariant` struct with `id` and `description` fields.
+- `Invariant` struct with `id` and `description` fields.
 
 - `RVM.bail(RVM.Invariant)` cheatcode to report a broken invariant by id.
 
 - `InvariantTest` base contract with `createInvariant` handles and bail-backed
   checks (`ensure`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`).
+
+- `Script` base contract for `ripfuzz exec` scripts with `rvm` and `log`.
+
+- `Base` base contract providing the shared `rvm` cheatcode interface.
 
 - `std.sol` entrypoint re-exporting the standard library.
 
