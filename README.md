@@ -160,6 +160,62 @@ Broken invariants are deduplicated by invariant id, so each id is reported once
 with its shortest reproduction. Invariant functions that use handle-based
 checks cannot be `view` because the checks call the ripfuzz VM.
 
+## Max
+
+Max mode answers "how large can this value get?". It generates sequences of
+handler calls, measures a `value()` function after every call, and reports the
+highest value found with the shortest sequence that produced it. Use it to
+validate limits and caps: the reported maximum shows whether a bound is tight
+or unreachable.
+
+A max harness inherits `Harness`, defines handlers and one `value()` function,
+and must not declare `invariant_*` functions:
+
+Example: [`examples/ExampleMax.sol`](examples/ExampleMax.sol), run by
+`make max`.
+
+```solidity
+import {Harness} from "ripfuzz/std.sol";
+
+contract ExampleMax is Harness {
+    function setup() external {
+        // Deploy the target and register actors.
+    }
+
+    function accrue(uint256 actorId, uint256 x) external useActor(actorId) {
+        x = bound(x, 1, 10);
+        accumulator.accrue(x);
+    }
+
+    function value() external view returns (uint256) {
+        // ...
+    }
+}
+```
+
+The `value` function takes no arguments, returns exactly one `uint256`, and
+must be `view` or `pure`. Read harness state with plain Solidity: calling
+cheatcodes inside `value` is not supported.
+
+Run with:
+
+```sh
+ripfuzz max examples/ExampleMax.sol
+```
+
+The campaign climbs toward the maximum and reports each improvement:
+
+```text
+initial value 0 measured for examples/ExampleMax.sol:ExampleMax
+found best sequence: value 100, 11 calls
+found best sequence: value 199, 20 calls
+shrinking finished: 20 calls, 10001 attempts, 3s
+```
+
+For the example accumulator, twenty `accrue` calls of at most `10` each reach
+`200`, so the campaign converges to `value 200` with a 20-call sequence: the
+bound is tight. The best sequence is saved under `.ripfuzz/traces` for replay.
+
 ## Scripts
 
 Scripts run deterministic flows once with `ripfuzz exec`. A script inherits
@@ -189,31 +245,8 @@ Run with:
 ripfuzz exec examples/ExampleScript.sol
 ```
 
-`log` output prints to the terminal and the execution trace is saved under
-`.ripfuzz/traces`.
-
-## Max
-
-Max mode finds the largest reachable value of a harness `value()` function.
-Inherit `Harness`, define `value()`, and run `ripfuzz max`:
-
-```solidity
-import {Harness} from "ripfuzz/std.sol";
-
-contract ExampleMax is Harness {
-    function value() external view returns (uint256) {
-        // ...
-    }
-}
-```
-
-Run with:
-
-```sh
-ripfuzz max examples/ExampleMax.sol
-```
-
-## Cheatcodes
+`log` output prints to the terminal and the execution trace is saved under ##
+Cheatcodes
 
 Harnesses, invariant tests, and scripts access ripfuzz cheatcodes through
 `rvm`. Full list: [`src/RVM.sol`](src/RVM.sol).

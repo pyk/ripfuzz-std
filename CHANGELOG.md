@@ -28,6 +28,11 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 - End-to-end script example at `examples/ExampleScript.sol`.
 
+- End-to-end max mode example at `examples/ExampleMax.sol` with a rewards
+  accumulator and a `value()` function measuring the highest pending reward.
+
+- `make max` target with a `MAXES` list for max mode smoke tests.
+
 ### Changed
 
 - Removed `Assertions` and its string-message checks (`ensure`, `eq`, `neq`,

@@ -1,10 +1,13 @@
-.PHONY: fmt test exec
+.PHONY: fmt test exec max
 
 TESTS := \
 	ExampleInvariantTest
 
 SCRIPTS := \
 	ExampleScript
+
+MAXES := \
+	ExampleMax
 
 fmt: # Run markdown formatter
 	@echo "Run markdown formatter"
@@ -30,6 +33,20 @@ exec: # Run example script smoke tests with ripfuzz
 	@for script in $(SCRIPTS); do \
 		echo "Run $$script smoke test"; \
 		ripfuzz exec examples/$$script.sol \
+			--log-level warn \
+			|| exit 1; \
+	done
+
+max: # Run example max smoke tests with ripfuzz
+	@echo "Clean ripfuzz corpus"
+	@rm -rf .ripfuzz/corpus
+	@for max in $(MAXES); do \
+		echo "Run $$max smoke test"; \
+		ripfuzz max examples/$$max.sol \
+			--max-fuzz-runs 100 \
+			--threads 2 \
+			--timeout 60 \
+			--max-calls 20 \
 			--log-level warn \
 			|| exit 1; \
 	done
