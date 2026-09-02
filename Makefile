@@ -9,6 +9,7 @@ HARNESSES := \
 	BoundHarness \
 	LoggingHarness \
 	AssertionsHarness \
+	ExampleInvariantTest \
 	TokensHarness \
 	ForkHarness \
 	MultiForkHarness
@@ -34,12 +35,11 @@ test: # Run example harness smoke tests with ripfuzz
 	@rm -rf .ripfuzz/corpus
 	@for harness in $(HARNESSES); do \
 		echo "Run $$harness smoke test"; \
-		ripfuzz run $$harness \
-			--force \
-			--max-runs 100 \
+		ripfuzz test examples/$$harness.sol \
+			--max-fuzz-runs 100 \
 			--threads 2 \
 			--timeout 60 \
 			--max-calls 20 \
-			--seed 1 \
-			--log-level warn; \
+			--log-level warn \
+			|| exit 1; \
 	done
