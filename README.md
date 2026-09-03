@@ -61,7 +61,7 @@ functions:
 
 Declare each invariant as a handle with `createInvariant`, then assert with the
 check family: `ensure`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`. A failed check
-reports the invariant by id through `rvm.bail`.
+reports the invariant by id by reverting with `BrokenInvariantError`.
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -272,7 +272,6 @@ Harnesses, invariant tests, and scripts access ripfuzz cheatcodes through
 | 6   | Code / wallet | `getCode`, `addr`, `sign`, `ffi`                           |
 | 7   | Environment   | `getEnv`                                                   |
 | 8   | Fork          | `fork`                                                     |
-| 9   | Invariant     | `bail`                                                     |
 
 ```solidity
 rvm.deal(user, 100 ether);
@@ -289,8 +288,9 @@ Notes:
   default instead. Values from a project `.env` file are supported.
 - `fork` switches chain state for all subsequent calls. Per-chain RPC URLs come
   from the environment or a project `.env` file.
-- `bail(Invariant)` reports a broken invariant and reverts the call. Prefer the
-  check helpers on `InvariantTest` over calling it directly.
+- Reverting with `BrokenInvariantError` reports a broken invariant and reverts
+  the call. Prefer the check helpers on `InvariantTest` over reverting it
+  directly.
 
 ## License
 

@@ -3,20 +3,21 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {Harness} from "./Harness.sol";
 import {Logger} from "./Logger.sol";
-import {RVM} from "./RVM.sol";
 
 /// @title InvariantTest
 ///
 /// @dev Base contract for ripfuzz invariant tests. Provides invariant handles
 ///      created via `createInvariant` and checks that report a broken
-///      invariant through `rvm.bail` instead of an assert panic.
+///      invariant through `BrokenInvariantError` instead of an assert panic.
 abstract contract InvariantTest is Harness, Logger {
     // [*] Invariant ===========================================================
 
-    /// @dev Identifies a broken invariant reported via `bail`.
-    ///
-    /// @dev Mirrors `RVM.Invariant` because Solidity cannot alias struct
-    ///      types, and a nested type is inherited into harness scope.
+    /// @dev Report a broken invariant by reverting with `id` and
+    ///      `description`. Ripfuzz records a handler or `invariant_*` call
+    ///      that reverts with this error as a broken invariant.
+    error BrokenInvariantError(string id, string description);
+
+    /// @dev Identifies a broken invariant reported via `BrokenInvariantError`.
     struct Invariant {
         /// @dev Stable invariant identifier such as `INV-01`. Must not be
         ///      empty.
@@ -229,7 +230,7 @@ abstract contract InvariantTest is Harness, Logger {
     /// @dev Report `inv` as broken and revert the active call.
     /// @param inv The broken invariant.
     function bail(Invariant memory inv) internal {
-        rvm.bail(RVM.Invariant({id: inv.id, description: inv.description}));
+        revert BrokenInvariantError({id: inv.id, description: inv.description});
     }
 
     /// @dev Log a failed check for `inv`, then bail.

@@ -34,7 +34,7 @@ contract Counter {
 /// @title ExampleInvariantTest
 ///
 /// @dev Example of end-to-end invariant testing with invariant handles
-///      reported via `rvm.bail` with stable ids.
+///      reported via `BrokenInvariantError` with stable ids.
 ///
 ///      Run with:
 ///

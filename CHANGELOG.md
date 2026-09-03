@@ -12,10 +12,13 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 - `Invariant` struct with `id` and `description` fields.
 
-- `RVM.bail(RVM.Invariant)` cheatcode to report a broken invariant by id.
+- `BrokenInvariantError` custom error on `InvariantTest`. A handler or
+  `invariant_*` call that reverts with it is recorded as a broken invariant by
+  id and description.
 
-- `InvariantTest` base contract with `createInvariant` handles and bail-backed
-  checks (`ensure`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`).
+- `InvariantTest` base contract with `createInvariant` handles and checks
+  (`ensure`, `eq`, `neq`, `gt`, `gte`, `lt`, `lte`) that report through
+  `BrokenInvariantError`.
 
 - `Script` base contract for `ripfuzz exec` scripts with `rvm` and `log`.
 
@@ -36,7 +39,7 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 ### Changed
 
 - Removed `Assertions` and its string-message checks (`ensure`, `eq`, `neq`,
-  `unreachable`). Use the bail-backed checks on `InvariantTest` instead.
+  `unreachable`). Use the `InvariantTest` checks instead.
 
 ### Fixed
 

@@ -203,21 +203,6 @@ interface RVM {
     /// @return value The environment variable value, or `defaultValue`.
     function getEnv(string calldata key, string calldata defaultValue) external returns (string memory value);
 
-    // [*] Invariant ==========================================================
-
-    /// @dev Identifies a broken invariant reported via `bail`.
-    struct Invariant {
-        /// @dev Stable invariant identifier such as `INV-01`. Must not be
-        ///      empty.
-        string id;
-        /// @dev Human-readable description of the broken invariant.
-        string description;
-    }
-
-    /// @dev Report a broken invariant and revert the active call.
-    /// @param invariant The invariant id and description.
-    function bail(Invariant calldata invariant) external;
-
     // [*] Fork ===============================================================
 
     /// @dev RPC options for `fork`. Defaults match the two-argument
