@@ -21,7 +21,7 @@ contract ExampleScript is Script {
     function exec() external {
         address alice = rvm.addr(1);
         rvm.label(alice, "alice");
-        rvm.deal(alice, 100 ether);
+        deal(alice, 100 ether);
 
         log("alice: ", alice);
         log("done");

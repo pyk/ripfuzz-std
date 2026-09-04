@@ -22,6 +22,17 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 - `Script` base contract for `ripfuzz exec` scripts with `rvm` and `log`.
 
+- `Deal` library with a foundry-style ERC20 `deal`. Probes the `balanceOf`
+  mapping slot with `rvm.store` and `rvm.load` and writes the new balance to
+  storage. Supports Solidity and Vyper mapping layouts, exposes
+  `findBalanceSlot` for probing the slot once, and a `deal` slot form for
+  repeated deals on the same token.
+
+- `deal` helpers on `Base`: `deal(account, value)` for ether and
+  `deal(token, account, value)` for ERC20 tokens, available on scripts and
+  harnesses without an import. Token balance slots are probed once and cached
+  per token.
+
 - `Base` base contract providing the shared `rvm` cheatcode interface.
 
 - `std.sol` entrypoint re-exporting the standard library.
@@ -31,12 +42,19 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 
 - End-to-end script example at `examples/ExampleScript.sol`.
 
+- End-to-end deal example at `examples/ExampleDeal.sol` that deals ether, WETH
+  (Solidity layout), and CRV (Vyper layout) to a labeled account on a pinned
+  mainnet fork, run by `make exec`.
+
 - End-to-end max mode example at `examples/ExampleMax.sol` with a rewards
   accumulator and a `value()` function measuring the highest pending reward.
 
 - `make max` target with a `MAXES` list for max mode smoke tests.
 
 ### Changed
+
+- `ExampleScript` funds its labeled account with the `deal` helper instead of
+  `rvm.deal`.
 
 - Removed `Assertions` and its string-message checks (`ensure`, `eq`, `neq`,
   `unreachable`). Use the `InvariantTest` checks instead.

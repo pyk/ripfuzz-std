@@ -4,6 +4,7 @@ TESTS := \
 	ExampleInvariantTest
 
 SCRIPTS := \
+	ExampleDeal \
 	ExampleScript
 
 MAXES := \
