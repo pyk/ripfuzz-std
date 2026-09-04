@@ -44,10 +44,10 @@ contract ExampleDeal is Script {
 
     /// @dev Fund `alice` with ether, WETH, and CRV, then assert the balances.
     function exec() external {
-        rvm.fork(RPC_URL, BLOCK_NUMBER);
+        fork(RPC_URL, BLOCK_NUMBER);
 
         address alice = rvm.addr(1);
-        rvm.label(alice, "alice");
+        label(alice, "alice");
 
         deal(alice, 100 ether);
         deal(address(WETH), alice, 100 ether);

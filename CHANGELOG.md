@@ -33,6 +33,9 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
   harnesses without an import. Token balance slots are probed once and cached
   per token.
 
+- `fork` and `label` helpers on `Base`, wrapping the matching `rvm` cheatcodes
+  so scripts and harnesses can call them without the prefix.
+
 - `Base` base contract providing the shared `rvm` cheatcode interface.
 
 - `std.sol` entrypoint re-exporting the standard library.

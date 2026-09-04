@@ -52,4 +52,24 @@ abstract contract Base {
         }
         Deal.deal(token, to, value, cached.slot, cached.layout);
     }
+
+    // [*] Fork ===============================================================
+
+    /// @dev Create or select a remote chain fork at `url` and `blockNumber`.
+    ///      Uses built-in defaults for retries, backoff, timeout, and rate
+    ///      limit.
+    /// @param url The RPC URL.
+    /// @param blockNumber The block number to fork at.
+    function fork(string memory url, uint256 blockNumber) internal {
+        rvm.fork(url, blockNumber);
+    }
+
+    // [*] Label ==============================================================
+
+    /// @dev Label `account` for clearer traces and logs.
+    /// @param account The account to label.
+    /// @param name The label to assign.
+    function label(address account, string memory name) internal {
+        rvm.label(account, name);
+    }
 }

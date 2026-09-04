@@ -20,7 +20,7 @@ contract ExampleScript is Script {
     /// @dev Fund a labeled account, then log its address.
     function exec() external {
         address alice = rvm.addr(1);
-        rvm.label(alice, "alice");
+        label(alice, "alice");
         deal(alice, 100 ether);
 
         log("alice: ", alice);

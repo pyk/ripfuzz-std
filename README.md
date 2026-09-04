@@ -35,33 +35,6 @@ ripfuzz has three use cases:
 | `ripfuzz max`  | Find the maximum value |
 | `ripfuzz exec` | Execute a script once  |
 
-### Dealing ether and ERC20 tokens
-
-Scripts and harnesses can call foundry-style `deal` helpers without any extra
-import. The ether form wraps the `rvm.deal` cheatcode. The token form probes
-the `balanceOf` mapping slot with `rvm.store` and `rvm.load`, then writes the
-new balance to storage. Both Solidity and Vyper mapping layouts are supported.
-
-```solidity
-deal(user, 100 ether);
-deal(token, user, 1_000_000e18);
-```
-
-End-to-end example: [`examples/ExampleDeal.sol`](examples/ExampleDeal.sol), run
-by `make exec`.
-
-Notes:
-
-- The token `deal` sets the balance, it does not add to it.
-- `totalSupply` is not updated.
-- Only plain `mapping(address => uint256)` balances are supported. Tokens that
-  derive balances (rebasing, fee-on-transfer, packed structs) revert with
-  `Deal: balance slot not found`.
-- Balance slots are probed once per token and cached on the calling script or
-  harness, so repeated deals on the same token skip the probe. Use
-  `Deal.findBalanceSlot` with the `Deal.deal` slot form to share a slot across
-  contracts.
-
 ## Invariant testing
 
 Invariant testing checks that properties of your protocol hold after every
@@ -318,6 +291,43 @@ Notes:
 - Reverting with `BrokenInvariantError` reports a broken invariant and reverts
   the call. Prefer the check helpers on `InvariantTest` over reverting it
   directly.
+
+### Dealing ether and ERC20 tokens
+
+Scripts and harnesses can call foundry-style `deal` helpers without any extra
+import. The ether form wraps the `rvm.deal` cheatcode. The token form probes
+the `balanceOf` mapping slot with `rvm.store` and `rvm.load`, then writes the
+new balance to storage. Both Solidity and Vyper mapping layouts are supported.
+
+```solidity
+deal(user, 100 ether);
+deal(token, user, 1_000_000e18);
+```
+
+End-to-end example: [`examples/ExampleDeal.sol`](examples/ExampleDeal.sol), run
+by `make exec`.
+
+Notes:
+
+- The token `deal` sets the balance, it does not add to it.
+- `totalSupply` is not updated.
+- Only plain `mapping(address => uint256)` balances are supported. Tokens that
+  derive balances (rebasing, fee-on-transfer, packed structs) revert with
+  `Deal: balance slot not found`.
+- Balance slots are probed once per token and cached on the calling script or
+  harness, so repeated deals on the same token skip the probe. Use
+  `Deal.findBalanceSlot` with the `Deal.deal` slot form to share a slot across
+  contracts.
+
+### Cheatcode shorthand
+
+A few cheatcodes are available directly on scripts and harnesses without the
+`rvm` prefix: `deal`, `fork`, and `label`.
+
+```solidity
+fork(rpcUrl, blockNumber);
+label(user, "alice");
+```
 
 ## License
 
