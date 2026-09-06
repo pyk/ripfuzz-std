@@ -6,15 +6,18 @@ import {RVM} from "../RVM.sol";
 
 /// @title Deal
 ///
-/// @dev Foundry-style deal helpers for ripfuzz harnesses. Sets ERC20 balances
-///      by locating the `balanceOf` mapping slot through probing and writing
-///      storage directly with the RVM `store` and `load` cheatcodes. Supports
-///      plain `mapping(address => uint256)` balances in both the Solidity
-///      (`keccak256(abi.encode(account, slot))`) and Vyper
-///      (`keccak256(abi.encode(slot, account))`) layouts, plus Solady ERC20
-///      unstructured balances (`keccak256` of the owner and the fixed balance
-///      seed). Tokens that derive balances from packed structs or other
-///      off-mapping state are not supported.
+/// @dev Foundry-style deal helpers for ripfuzz harnesses.
+///
+/// @dev Sets ERC20 balances by locating the `balanceOf` slot through probing,
+///      then writing storage directly with RVM `store` and `load`.
+///
+/// @dev Supports these layouts:
+///      - Solidity: `keccak256(abi.encode(account, slot))`.
+///      - Vyper: `keccak256(abi.encode(slot, account))`.
+///      - Solady: `keccak256` of the owner and the fixed balance seed.
+///
+/// @dev Tokens that derive balances from packed structs or other off-mapping
+///      state are not supported.
 library Deal {
     // [*] Deal ===============================================================
 
