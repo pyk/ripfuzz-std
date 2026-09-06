@@ -52,6 +52,11 @@ Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 - End-to-end max mode example at `examples/ExampleMax.sol` with a rewards
   accumulator and a `value()` function measuring the highest pending reward.
 
+- `Layout.Solady` in the `Deal` library. The balance probe covers Solady ERC20
+  unstructured balances (`keccak256` of the owner and the fixed balance seed),
+  so `deal` works on Solady-based tokens whose mapping sits outside the
+  sequential slot range.
+
 - `make max` target with a `MAXES` list for max mode smoke tests.
 
 ### Changed

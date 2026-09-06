@@ -11,8 +11,10 @@ import {RVM} from "../RVM.sol";
 ///      storage directly with the RVM `store` and `load` cheatcodes. Supports
 ///      plain `mapping(address => uint256)` balances in both the Solidity
 ///      (`keccak256(abi.encode(account, slot))`) and Vyper
-///      (`keccak256(abi.encode(slot, account))`) layouts. Tokens that derive
-///      balances from packed structs or off-mapping state are not supported.
+///      (`keccak256(abi.encode(slot, account))`) layouts, plus Solady ERC20
+///      unstructured balances (`keccak256` of the owner and the fixed balance
+///      seed). Tokens that derive balances from packed structs or other
+///      off-mapping state are not supported.
 library Deal {
     // [*] Deal ===============================================================
 
@@ -26,6 +28,10 @@ library Deal {
     /// @dev Number of candidate slots scanned per layout.
     uint256 internal constant MAX_SLOT = 64;
 
+    /// @dev Solady ERC20 balance seed, the fixed suffix of the balance key.
+    ///      See `Solady ERC20 _BALANCE_SLOT_SEED`.
+    uint256 internal constant SOLADY_BALANCE_SEED = 0x87a211a2;
+
     // [*] RVM ================================================================
 
     address internal constant RVM_ADDRESS = address(uint160(uint256(keccak256("ripfuzz cheatcode"))));
@@ -37,7 +43,8 @@ library Deal {
     /// @dev How a token hashes `balances[account]`.
     enum Layout {
         Solidity,
-        Vyper
+        Vyper,
+        Solady
     }
 
     /// @dev Set the ERC20 balance of `to` on `token` to `value`. Probes the
@@ -65,15 +72,18 @@ library Deal {
     // [*] Probe ==============================================================
 
     /// @dev Find the `balanceOf` mapping slot of `token`. Probes candidate
-    ///      slots 0 to 63 for both mapping layouts and restores each probed
-    ///      slot afterwards. Reverts when no candidate slot matches.
+    ///      slots 0 to 63 for the sequential layouts, then the fixed Solady
+    ///      key, and restores each probed slot afterwards. Reverts when no
+    ///      candidate slot matches.
     /// @param token The ERC20 token.
-    /// @return slot The mapping slot index.
+    /// @return slot The mapping slot index, zero for the Solady layout.
     /// @return layout The mapping key layout.
     function findBalanceSlot(address token) internal returns (uint256 slot, Layout layout) {
-        for (uint256 l; l < 2; l++) {
+        for (uint256 l; l < 3; l++) {
             Layout candidate = Layout(l);
-            for (uint256 s; s < MAX_SLOT; s++) {
+            // The Solady key ignores the slot, so one probe decides it.
+            uint256 max = candidate == Layout.Solady ? 1 : MAX_SLOT;
+            for (uint256 s; s < max; s++) {
                 bytes32 hashed = mappingKey(candidate, PROBE, s);
                 bytes32 prev = rvm.load(token, hashed);
                 rvm.store(token, hashed, bytes32(SENTINEL));
@@ -106,7 +116,8 @@ library Deal {
     }
 
     /// @dev Hash `account` and `slot` into the mapping storage key for
-    ///      `layout`.
+    ///      `layout`. The Solady layout ignores `slot` and hashes the owner
+    ///      against the fixed balance seed instead.
     /// @param layout The mapping key layout.
     /// @param account The mapping key.
     /// @param slot The mapping slot index.
@@ -114,6 +125,9 @@ library Deal {
     function mappingKey(Layout layout, address account, uint256 slot) internal pure returns (bytes32) {
         if (layout == Layout.Vyper) {
             return keccak256(abi.encode(slot, account));
+        }
+        if (layout == Layout.Solady) {
+            return keccak256(abi.encodePacked(account, bytes8(uint64(0)), bytes4(uint32(SOLADY_BALANCE_SEED))));
         }
         return keccak256(abi.encode(account, slot));
     }
