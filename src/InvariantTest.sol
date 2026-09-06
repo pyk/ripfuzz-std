@@ -229,7 +229,7 @@ abstract contract InvariantTest is Harness, Logger {
 
     /// @dev Report `inv` as broken and revert the active call.
     /// @param inv The broken invariant.
-    function bail(Invariant memory inv) internal {
+    function bail(Invariant memory inv) internal pure {
         revert BrokenInvariantError({id: inv.id, description: inv.description});
     }
 

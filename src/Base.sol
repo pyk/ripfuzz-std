@@ -22,7 +22,7 @@ abstract contract Base {
         /// @dev The mapping slot index.
         uint256 slot;
         /// @dev The mapping key layout.
-        Deal.Layout layout;
+        Deal.Layout keyLayout;
         /// @dev Whether the slot has been probed.
         bool found;
     }
@@ -47,10 +47,10 @@ abstract contract Base {
     function deal(address token, address to, uint256 value) internal {
         DealSlot storage cached = _dealSlots[token];
         if (!cached.found) {
-            (cached.slot, cached.layout) = Deal.findBalanceSlot(token);
+            (cached.slot, cached.keyLayout) = Deal.findBalanceSlot(token);
             cached.found = true;
         }
-        Deal.deal(token, to, value, cached.slot, cached.layout);
+        Deal.deal(token, to, value, cached.slot, cached.keyLayout);
     }
 
     // [*] Fork ===============================================================

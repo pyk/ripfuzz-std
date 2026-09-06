@@ -57,8 +57,8 @@ library Deal {
     /// @param to The recipient account.
     /// @param value The new token balance.
     function deal(address token, address to, uint256 value) internal {
-        (uint256 slot, Layout layout) = findBalanceSlot(token);
-        rvm.store(token, mappingKey(layout, to, slot), bytes32(value));
+        (uint256 slot, Layout keyLayout) = findBalanceSlot(token);
+        rvm.store(token, mappingKey(keyLayout, to, slot), bytes32(value));
     }
 
     /// @dev Set the ERC20 balance of `to` on `token` to `value` at a balance
@@ -67,9 +67,9 @@ library Deal {
     /// @param to The recipient account.
     /// @param value The new token balance.
     /// @param slot The mapping slot index of `balanceOf`.
-    /// @param layout The mapping key layout of `balanceOf`.
-    function deal(address token, address to, uint256 value, uint256 slot, Layout layout) internal {
-        rvm.store(token, mappingKey(layout, to, slot), bytes32(value));
+    /// @param keyLayout The mapping key layout of `balanceOf`.
+    function deal(address token, address to, uint256 value, uint256 slot, Layout keyLayout) internal {
+        rvm.store(token, mappingKey(keyLayout, to, slot), bytes32(value));
     }
 
     // [*] Probe ==============================================================
@@ -80,8 +80,8 @@ library Deal {
     ///      candidate slot matches.
     /// @param token The ERC20 token.
     /// @return slot The mapping slot index, zero for the Solady layout.
-    /// @return layout The mapping key layout.
-    function findBalanceSlot(address token) internal returns (uint256 slot, Layout layout) {
+    /// @return keyLayout The mapping key layout.
+    function findBalanceSlot(address token) internal returns (uint256 slot, Layout keyLayout) {
         for (uint256 l; l < 3; l++) {
             Layout candidate = Layout(l);
             // The Solady key ignores the slot, so one probe decides it.
@@ -119,17 +119,17 @@ library Deal {
     }
 
     /// @dev Hash `account` and `slot` into the mapping storage key for
-    ///      `layout`. The Solady layout ignores `slot` and hashes the owner
+    ///      `keyLayout`. The Solady layout ignores `slot` and hashes the owner
     ///      against the fixed balance seed instead.
-    /// @param layout The mapping key layout.
+    /// @param keyLayout The mapping key layout.
     /// @param account The mapping key.
     /// @param slot The mapping slot index.
     /// @return The hashed storage slot.
-    function mappingKey(Layout layout, address account, uint256 slot) internal pure returns (bytes32) {
-        if (layout == Layout.Vyper) {
+    function mappingKey(Layout keyLayout, address account, uint256 slot) internal pure returns (bytes32) {
+        if (keyLayout == Layout.Vyper) {
             return keccak256(abi.encode(slot, account));
         }
-        if (layout == Layout.Solady) {
+        if (keyLayout == Layout.Solady) {
             return keccak256(abi.encodePacked(account, bytes8(uint64(0)), bytes4(uint32(SOLADY_BALANCE_SEED))));
         }
         return keccak256(abi.encode(account, slot));
